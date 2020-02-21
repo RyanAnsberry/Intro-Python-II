@@ -1,4 +1,12 @@
 from room import Room
+from player import Player
+from item import Item
+
+item = {
+    'key': Item("Key", "It's shiny"),
+    'note': Item("Note", "It says 'The treasure is behind a locked door"),
+    'torch': Item("Torch", "It provides light")
+}
 
 # Declare all the rooms
 
@@ -7,14 +15,14 @@ room = {
                      "North of you, the cave mount beckons"),
 
     'foyer':    Room("Foyer", """Dim light filters in from the south. Dusty
-passages run north and east."""),
+passages run north and east.""", [Item("Key", "It's shiny"), Item("Note", "It says 'The treasure is behind a locked door")]),
 
     'overlook': Room("Grand Overlook", """A steep cliff appears before you, falling
 into the darkness. Ahead to the north, a light flickers in
 the distance, but there is no way across the chasm."""),
 
     'narrow':   Room("Narrow Passage", """The narrow passage bends here from west
-to north. The smell of gold permeates the air."""),
+to north. The smell of gold permeates the air.""", [Item("Torch", "It provides light")]),
 
     'treasure': Room("Treasure Chamber", """You've found the long-lost treasure
 chamber! Sadly, it has already been completely emptied by
@@ -39,6 +47,8 @@ room['treasure'].s_to = room['narrow']
 
 # Make a new player object that is currently in the 'outside' room.
 
+new_player = Player("Player 1", room['outside'])
+
 # Write a loop that:
 #
 # * Prints the current room name
@@ -49,3 +59,63 @@ room['treasure'].s_to = room['narrow']
 # Print an error message if the movement isn't allowed.
 #
 # If the user enters "q", quit the game.
+
+cmd = ""
+
+print("\nPossible commands:\n>> 'go' + 'north', 'south', 'east', 'west'\n>> 'take' + <item name>\n>> 'drop' + <item name>\n>> 'i' to check inventory\n>> 'q' to quit")
+
+print(f"You are {new_player.current_room}")
+while cmd != ["q"]:
+    cmd = str(input("\nType a command or 'q' to quit: ")).lower().split()
+
+    # Movement
+    if cmd[0] == "go":
+        if cmd[1] == "north":
+            if new_player.current_room.n_to != None:
+                new_player.current_room = new_player.current_room.n_to
+                print(f"\nYou enter the {new_player.current_room}")
+                new_player.current_room.search()
+            else:
+                print("\nYou cannot continue North from here")
+
+        elif cmd[1] == "south":
+            if new_player.current_room.s_to != None:
+                new_player.current_room = new_player.current_room.s_to
+                print(f"\nYou enter the {new_player.current_room}")
+                new_player.current_room.search()
+            else:
+                print("\nYou cannot continue South from here")
+
+        elif cmd[1] == "west":
+            if new_player.current_room.w_to != None:
+                new_player.current_room = new_player.current_room.w_to
+                print(f"\nYou enter the {new_player.current_room}")
+                new_player.current_room.search()
+            else:
+                print("\nYou cannot continue West from here")
+
+        elif cmd[1] == "east":
+            if new_player.current_room.e_to != None:
+                new_player.current_room = new_player.current_room.e_to
+                print(f"\nYou enter the {new_player.current_room}")
+                new_player.current_room.search()
+            else:
+                print("\nYou cannot continue East from here")
+
+    # Take items            
+    elif cmd[0] == "take":
+        cmd_item = cmd[1].lower()
+        new_player.current_room.remove_item(cmd_item)
+        new_player.take_item(item[f"{cmd_item}"])
+
+    # Drop items
+    elif cmd[0] == "drop":
+        cmd_item = cmd[1].lower()
+        new_player.drop_item(item[f"{cmd_item}"])
+        new_player.current_room.add_item(item[f"{cmd_item}"])
+    
+    # Check player inventory
+    elif cmd == ["i"]:
+        new_player.check_inventory()
+    
+
